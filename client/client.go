@@ -186,7 +186,6 @@ func isHost(id string) bool {
 }
 
 func GetSubsystemPath(subsystem string, id string) (string, error) {
-	slice := "system.slice"
 	groupPath, err := cgroups.FindCgroupMountpoint(subsystem)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[WARNING] Could not find mount point for %s\n", subsystem)
@@ -194,20 +193,21 @@ func GetSubsystemPath(subsystem string, id string) (string, error) {
 	}
 
 	if isRunningSystemd() {
+		slice := "docker"
 		groupPath = filepath.Join(groupPath, slice)
-
 		if !isHost(id) {
-			groupPath = filepath.Join(groupPath, "docker-"+id+".scope")
+			groupPath = filepath.Join(groupPath, id)
 		}
 		return groupPath, nil
 	}
 
 	if !isHost(id) {
 		groupPath = filepath.Join(groupPath, id)
-
 	}
+
 	return groupPath, nil
 }
+
 
 // GetStatsFromContainer returns docker containers stats: cgroups stats (cpu usage, memory usage, etc.) and network stats (tx_bytes, rx_bytes etc.)
 // Notes: incoming container id has to be full-length to be able to inspect container
